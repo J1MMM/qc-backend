@@ -12,9 +12,7 @@ const {
 } = require("../../controllers/usersController");
 const router = express.Router();
 
-// router.route("/");
-// .get(getAllUsers)
-// .post(createUser)
+router.route("/").get(getAllUsers).post(createUser);
 // .put(updateUser)
 // .delete(deleteUser)
 // .patch(archiveUser);
