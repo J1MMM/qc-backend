@@ -36,6 +36,7 @@ app.use("/users", require("./routes/api/users"));
 
 // protected routes
 app.use(verifyJWT);
+app.use("/votes", require("./routes/api/votes"));
 
 // 404
 app.all("*", (req, res) => {

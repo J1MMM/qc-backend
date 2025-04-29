@@ -24,17 +24,19 @@ const checkEmailDuplication = async (req, res) => {
 };
 
 const createUser = async (req, res) => {
-  const accountDetails = req.body;
-  if (!accountDetails)
-    return res.status(400).json({ message: "All fields are required" });
-
-  const duplicate = await User.findOne({ email: accountDetails.email }).exec();
-  if (duplicate)
-    return res
-      .status(409)
-      .json({ message: "This Email Address is Already in use" }); //confilict
-
   try {
+    const accountDetails = req.body;
+    if (!accountDetails)
+      return res.status(400).json({ message: "All fields are required" });
+
+    const duplicate = await User.findOne({
+      email: accountDetails.email,
+    }).exec();
+    if (duplicate)
+      return res
+        .status(409)
+        .json({ message: "This Email Address is Already in use" }); //confilict
+
     const hashedPwd = await bcrypt.hash(accountDetails.password, 10);
 
     const result = await User.create({

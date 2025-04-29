@@ -2,11 +2,35 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const userSchema = new Schema({
+  pcosNo: {
+    type: String,
+    required: true,
+  },
+  precinctNo: {
+    type: String,
+    required: true,
+  },
+  barangay: {
+    type: String,
+    required: true,
+  },
+  city: {
+    type: String,
+    required: true,
+  },
+  district: {
+    type: String,
+    required: true,
+  },
   firstname: {
     type: String,
     required: true,
   },
   lastname: {
+    type: String,
+    required: true,
+  },
+  role: {
     type: String,
     required: true,
   },
@@ -19,13 +43,8 @@ const userSchema = new Schema({
     type: String,
     required: true,
   },
+
   refreshToken: String,
-  roles: {
-    admin: {
-      type: Number,
-      default: 0,
-    },
-  },
 
   archive: {
     type: Boolean,

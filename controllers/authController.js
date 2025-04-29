@@ -3,22 +3,27 @@ const jwt = require("jsonwebtoken");
 const User = require("../model/User");
 
 const handleLogin = async (req, res) => {
-  const { email, password } = req.body;
+  const { pcosNo, password } = req.body;
 
-  if (!email || !password)
-    return res.status(400).json({ message: "Email and Password are required" });
+  if (!pcosNo || !password)
+    return res
+      .status(400)
+      .json({ message: "PCOS No. and Password are required" });
 
   try {
     const foundUser = await User.findOne({
-      email: email,
+      pcosNo: pcosNo,
       archive: false,
     });
+
     if (!foundUser)
       return res.status(401).json({ message: "Unauthorized: User not found" });
 
     const match = await bcrypt.compare(password, foundUser.password);
     if (!match)
-      return res.status(401).json({ message: "Incorrect email or password" });
+      return res
+        .status(401)
+        .json({ message: "Incorrect PCOS No. or password" });
 
     foundUser.refreshToken = null; // Clear existing refresh token
 
@@ -29,8 +34,14 @@ const handleLogin = async (req, res) => {
       {
         UserInfo: {
           id: id,
-          email: foundUser.email,
           fullname: fullname,
+          email: foundUser.email,
+          role: foundUser.role,
+          pcosNo: foundUser.pcosNo,
+          precinctNo: foundUser.precinctNo,
+          district: foundUser.district,
+          barangay: foundUser.barangay,
+          city: foundUser.city,
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
@@ -54,7 +65,18 @@ const handleLogin = async (req, res) => {
       secure: isProduction, // Secure cookie only in production
     });
 
-    res.json({ accessToken, fullname });
+    res.json({
+      fullname,
+      id: foundUser._id,
+      role: foundUser.role,
+      pcosNo: foundUser.pcosNo,
+      precinctNo: foundUser.precinctNo,
+      district: foundUser.district,
+      barangay: foundUser.barangay,
+      city: foundUser.city,
+      accessToken,
+      message: "Successfully logged in",
+    });
   } catch (error) {
     console.error("Login Error: ", error);
     res.status(500).json({ message: "Internal server error" });
