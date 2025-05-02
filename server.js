@@ -12,7 +12,7 @@ const verifyJWT = require("./middleware/verifyJWT");
 const cookieParser = require("cookie-parser");
 const credentials = require("./middleware/credentials");
 
-const PORT = process.env.PORT || 3500;
+const PORT = process.env.PORT || 3000;
 // connect to mongooDB
 connectDB();
 // custom middleware

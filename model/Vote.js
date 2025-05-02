@@ -22,7 +22,15 @@ const voteSchema = new Schema({
     type: String,
     required: true,
   },
+  barangay: {
+    type: String,
+    required: false,
+  },
   city: {
+    type: String,
+    required: true,
+  },
+  district: {
     type: String,
     required: true,
   },

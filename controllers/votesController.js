@@ -53,23 +53,118 @@ const getTotalVotes = async (req, res) => {
 const getTally = async (req, res) => {
   try {
     const result = await Vote.aggregate([
+      // First: Match votes (optional, if you want to filter candidates)
+      // { $match: { position: "Governor" } },
+
+      // Parallel pipelines — city and brgy breakdown
       {
-        $group: {
-          _id: "$candidate",
-          totalVotes: { $sum: "$votes" },
-          position: { $first: "$position" },
+        $facet: {
+          votesPerCity: [
+            {
+              $group: {
+                _id: {
+                  candidate: "$candidate",
+                  city: "$city",
+                },
+                totalVotes: { $sum: "$votes" },
+                position: { $first: "$position" },
+                district: { $first: "$district" },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id.candidate",
+                position: { $first: "$position" },
+                district: { $first: "$district" },
+                votesPerCity: {
+                  $push: {
+                    city: "$_id.city",
+                    totalVotes: "$totalVotes",
+                  },
+                },
+                totalVotes: { $sum: "$totalVotes" },
+              },
+            },
+          ],
+          votesPerBrgy: [
+            {
+              $group: {
+                _id: {
+                  candidate: "$candidate",
+                  barangay: "$barangay",
+                },
+                totalVotes: { $sum: "$votes" },
+                position: { $first: "$position" },
+                district: { $first: "$district" },
+              },
+            },
+            // Match to exclude empty or null barangay values
+            {
+              $match: {
+                "_id.barangay": { $ne: "", $exists: true },
+              },
+            },
+            {
+              $group: {
+                _id: "$_id.candidate",
+                position: { $first: "$position" },
+                district: { $first: "$district" },
+                votesPerBrgy: {
+                  $push: {
+                    barangay: "$_id.barangay",
+                    totalVotes: "$totalVotes",
+                  },
+                },
+              },
+            },
+          ],
         },
       },
+
+      // Merge both facets into one doc per candidate
       {
         $project: {
-          _id: 0, // remove MongoDB default _id
-          name: "$_id", // create new field 'name' from '_id'
-          totalVotes: 1, // keep totalVotes
-          position: 1, // keep position
+          combined: {
+            $map: {
+              input: "$votesPerCity",
+              as: "city",
+              in: {
+                name: "$$city._id",
+                position: "$$city.position",
+                district: "$$city.district",
+                totalVotes: "$$city.totalVotes",
+                votesPerCity: "$$city.votesPerCity",
+                votesPerBrgy: {
+                  $let: {
+                    vars: {
+                      barangay: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$votesPerBrgy",
+                              as: "barangay",
+                              cond: { $eq: ["$$barangay._id", "$$city._id"] },
+                            },
+                          },
+                          0,
+                        ],
+                      },
+                    },
+                    in: "$$barangay.votesPerBrgy",
+                  },
+                },
+              },
+            },
+          },
         },
       },
+      {
+        $unwind: "$combined",
+      },
+      {
+        $replaceRoot: { newRoot: "$combined" },
+      },
     ]);
-
     if (!result.length) {
       return res.status(404).json({ message: "No votes found" });
     }
