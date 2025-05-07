@@ -60,11 +60,12 @@ const createUser = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
+
 const updateUser = async (req, res) => {
   const recordData = req.body;
 
   try {
-    const record = await Record.findById(recordData?.id);
+    const record = await User.findById(recordData?.id);
     if (!record) {
       return res.status(404).json({ message: "user's data not found." });
     }

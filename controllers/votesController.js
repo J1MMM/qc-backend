@@ -3,7 +3,36 @@ const Vote = require("../model/Vote");
 const addVotes = async (req, res) => {
   try {
     const data = req.body;
-    console.log(data);
+    // console.log(data);
+    const candidateTotalVotes = await Vote.aggregate([
+      {
+        $match: { pcosNo: data?.pcosNo, candidate: data?.candidate },
+      },
+      {
+        $group: {
+          _id: "$candidate",
+          totalVotes: { $sum: "$votes" },
+          position: { $first: "$position" },
+        },
+      },
+      {
+        $project: {
+          _id: 0, // remove MongoDB default _id
+          name: "$_id", // create new field 'name' from '_id'
+          totalVotes: 1, // keep totalVotes
+          position: 1, // keep position
+        },
+      },
+    ]);
+    console.log(candidateTotalVotes);
+    console.log(candidateTotalVotes[0]?.totalVotes);
+    console.log(parseInt(data?.votes));
+
+    if (candidateTotalVotes[0]?.totalVotes + parseInt(data?.votes) < 0) {
+      console.log("Votes cannot be negative");
+
+      return res.status(400).json({ message: "Votes cannot be negative" });
+    }
 
     await Vote.create(data);
 
