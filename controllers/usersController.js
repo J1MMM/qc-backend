@@ -6,7 +6,7 @@ const ROLES_LIST = require("../config/roles_list");
 const getAllUsers = async (req, res) => {
   try {
     const result = await User.find();
-    if (!result) return res.status(204).json({ message: "No students found" });
+    if (!result) return res.status(204).json({ message: "No Users found" });
     res.json(result);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -32,10 +32,14 @@ const createUser = async (req, res) => {
     const duplicate = await User.findOne({
       email: accountDetails.email,
     }).exec();
-    if (duplicate)
+
+    const pcosDuplicate = await User.findOne({
+      pcosNo: accountDetails.pcosNo,
+    }).exec();
+    if (duplicate || pcosDuplicate)
       return res
         .status(409)
-        .json({ message: "This Email Address is Already in use" }); //confilict
+        .json({ message: "This PCOS No. or Email Address is Already in use" }); //confilict
 
     const hashedPwd = await bcrypt.hash(accountDetails.password, 10);
 
@@ -52,58 +56,33 @@ const createUser = async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 };
-
 const updateUser = async (req, res) => {
-  if (!req.body?.id)
-    return res.status(400).json({ message: "ID are required" });
+  const recordData = req.body;
 
   try {
-    const user = await User.findOne({ _id: req.body.id }).exec();
-    let pwdMatch = false;
-
-    if (req?.body?.password) {
-      pwdMatch = await bcrypt.compare(req.body.password, user.password);
-    } else {
-      pwdMatch = true;
+    const record = await Record.findById(recordData?.id);
+    if (!record) {
+      return res.status(404).json({ message: "user's data not found." });
     }
 
-    const duplicate = await User.findOne({ email: req.body.email }).exec();
-    if (duplicate && duplicate._id != req.body.id)
-      return res.status(409).json({ message: "Email address already in use" });
+    record.set(recordData);
 
-    if (req?.body?.firstname) user.firstname = req.body.firstname;
-    if (req?.body?.lastname) user.lastname = req.body.lastname;
-    if (req?.body?.middlename) user.middlename = req.body.middlename;
-    if (req?.body?.gender) user.gender = req.body.gender;
-    if (req?.body?.address) user.address = req.body.address;
-    if (req?.body?.contactNo) user.contactNo = req.body.contactNo;
-    if (req?.body?.middlename?.trim() === "") {
-      user.middlename = "";
-    }
-    if (req?.body?.email) user.email = req.body.email;
-    if (req?.body?.password)
-      user.password = await bcrypt.hash(req.body.password, 10);
-    if (req?.body?.role)
-      user.roles = { [req.body.role]: ROLES_LIST[req.body.role] };
-
-    const result = await user.save();
-    res.json({ success: "User updated successfully!", result });
+    await record.save();
+    res.json({ message: "The user's data was updated successfully." });
   } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
 
 const deleteUser = async (req, res) => {
-  const { idsToDelete } = req.body;
-  if (!idsToDelete) return res.sendStatus(400);
+  const { id } = req.body;
+  if (!id) return res.sendStatus(400);
 
   try {
-    await User.deleteMany({ _id: { $in: idsToDelete } });
+    await User.deleteOne({ _id: id });
 
     const result = await User.find();
-
-    res.json(result);
+    res.json({ result, message: "User's data was deleted successfully." });
   } catch (error) {
     console.log(error);
     res.status(400).json({ message: error.message });

@@ -4,7 +4,7 @@ const nodeMailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 
 const sendMail = async (req, res) => {
-  const { email } = req.body.data;
+  const { email } = req.body;
   if (!email) return res.status(400).json({ message: "Email is required" });
 
   try {
@@ -33,8 +33,8 @@ const sendMail = async (req, res) => {
       },
     });
 
-    // const resetPageUrl = 'http://localhost:5173'
-    const resetPageUrl = "https://ppp-learning-tool.vercel.app";
+    const resetPageUrl = "http://localhost:5173";
+    // const resetPageUrl = "https://ppp-learning-tool.vercel.app";
     const html = `
 		 		<!DOCTYPE html>
  				<html>
@@ -56,11 +56,11 @@ const sendMail = async (req, res) => {
 		 		<body>
 		 		<div style="width: 100%; background-color: #F5F5F3; padding: 80px 10px; box-sizing: border-box">
 				    <div style="width: 100%; background-color: #FFF; padding: 30px; max-width: 480px; margin: auto; border-radius: 10px; box-sizing: border-box">
-				        <h1 style="margin: 0; text-align: center; font-weight: bold; font-size: xx-large">Reset your PPPedu password</h1>
+				        <h1 style="margin: 0; text-align: center; font-weight: bold; font-size: xx-large">QuickCount System — Password Reset</h1>
 			            <p style="text-align: center; margin: 0; margin-top: 16px;">Hi ${foundUser.firstname} ${foundUser.lastname},</p>
 			            <p style="text-align: center; margin-top: 0;">We're sending you this email because you requested a password reset. Click on this link to create new password</p>
 
-			            <a href='${resetPageUrl}/reset-password/${resetToken}' style="display: block; padding: 10px 20px; background-color: #2DA549; color: #FFF; text-decoration: none; border-radius: 10px; margin: 30px auto; width: fit-content; font-size: large; margin-top: 20px"> Set a new password </a>
+			            <a href='${resetPageUrl}/reset-password/${resetToken}' style="display: block; padding: 10px 20px; background-color: #219192; color: #FFF; text-decoration: none; margin: 30px auto; width: fit-content; font-size: large; margin-top: 20px"> Set a new password </a>
 
 			            <small style="display: block;text-align: center; max-width: 80%; margin: auto">If you did not request a password reset, you can safely ignore this email. Only a person with access to your email can reset your account password</small>
 				    </div>
@@ -70,9 +70,9 @@ const sendMail = async (req, res) => {
 		`;
 
     const info = await transport.sendMail({
-      from: "PPPedu <pppedu@email.edu>",
+      from: "QuickCount System <quickcount@email.io>",
       to: email,
-      subject: "Password Reset",
+      subject: "Reset Password",
       html: html,
     });
 

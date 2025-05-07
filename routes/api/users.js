@@ -6,15 +6,15 @@ const {
   updateUser,
   deleteUser,
   createUser,
-  getUser,
-  archiveUser,
-  checkEmailDuplication,
 } = require("../../controllers/usersController");
 const router = express.Router();
 
-router.route("/").get(getAllUsers).post(createUser);
-// .put(updateUser)
-// .delete(deleteUser)
+router
+  .route("/")
+  .get(getAllUsers)
+  .post(createUser)
+  .put(updateUser)
+  .delete(deleteUser);
 // .patch(archiveUser);
 
 // router
