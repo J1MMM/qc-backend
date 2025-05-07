@@ -5,9 +5,13 @@ const ROLES_LIST = require("../config/roles_list");
 
 const getAllUsers = async (req, res) => {
   try {
-    const result = await User.find();
-    if (!result) return res.status(204).json({ message: "No Users found" });
-    res.json(result);
+    const users = await User.find({ role: { $ne: "Admin" } }); // exclude admin
+
+    if (!users || users.length === 0) {
+      return res.status(204).json({ message: "No users found" });
+    }
+
+    res.json(users);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
