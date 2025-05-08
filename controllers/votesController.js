@@ -24,13 +24,9 @@ const addVotes = async (req, res) => {
         },
       },
     ]);
-    console.log(candidateTotalVotes);
-    console.log(candidateTotalVotes[0]?.totalVotes);
-    console.log(parseInt(data?.votes));
 
     if (candidateTotalVotes[0]?.totalVotes + parseInt(data?.votes) < 0) {
       console.log("Votes cannot be negative");
-
       return res.status(400).json({ message: "Votes cannot be negative" });
     }
 

@@ -33,8 +33,8 @@ const sendMail = async (req, res) => {
       },
     });
 
-    const resetPageUrl = "http://localhost:5173";
-    // const resetPageUrl = "https://ppp-learning-tool.vercel.app";
+    // const resetPageUrl = "http://localhost:5173";
+    const resetPageUrl = "https://quickcount-production.up.railway.app";
     const html = `
 		 		<!DOCTYPE html>
  				<html>
