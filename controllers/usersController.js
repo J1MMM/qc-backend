@@ -70,6 +70,11 @@ const updateUser = async (req, res) => {
       return res.status(404).json({ message: "user's data not found." });
     }
 
+    if (recordData?.password) {
+      const hashedPwd = await bcrypt.hash(recordData.password, 10);
+      recordData.password = hashedPwd;
+    }
+
     record.set(recordData);
 
     await record.save();
